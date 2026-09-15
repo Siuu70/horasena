@@ -307,3 +307,16 @@ test('calendario mensual: estados por día', () => {
   assert.equal(byDate['2026-09-19'].estado, 'no_habil');
   assert.equal(byDate['2026-09-30'].estado, 'libre');
 });
+
+test('semáforo de avance: rojo < 33 %, amarillo 33-67 %, verde > 67 %', () => {
+  assert.equal(C.semaforo(0).level, 'rojo');
+  assert.equal(C.semaforo(0).label, 'Inicio');
+  assert.equal(C.semaforo(7.7).level, 'rojo');
+  assert.equal(C.semaforo(32.9).level, 'rojo');
+  assert.equal(C.semaforo(33).level, 'amarillo');
+  assert.equal(C.semaforo(50).level, 'amarillo');
+  assert.equal(C.semaforo(67).level, 'amarillo');
+  assert.equal(C.semaforo(67.1).level, 'verde');
+  assert.equal(C.semaforo(100).label, 'Meta cumplida');
+  assert.equal(C.semaforo('abc').level, 'rojo');
+});

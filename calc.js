@@ -90,6 +90,16 @@
 
   function round1(n) { return Math.round(n * 10) / 10; }
 
+  /** Semáforo de avance: rojo < 33 %, amarillo 33-67 %, verde > 67 %. */
+  const SEMAFORO = Object.freeze({ rojo: 33, amarillo: 67 });
+  function semaforo(pct) {
+    pct = Number(pct) || 0;
+    if (pct >= 100) return { level: 'verde', label: 'Meta cumplida', icon: '🟢' };
+    if (pct > SEMAFORO.amarillo) return { level: 'verde', label: 'Avance avanzado', icon: '🟢' };
+    if (pct >= SEMAFORO.rojo) return { level: 'amarillo', label: 'En proceso', icon: '🟡' };
+    return { level: 'rojo', label: pct > 0 ? 'Retraso crítico' : 'Inicio', icon: '🔴' };
+  }
+
   // ---------------------------------------------------------------------------
   // Festivos de Colombia (Ley 51 de 1983, "ley Emiliani")
   // ---------------------------------------------------------------------------
@@ -601,7 +611,7 @@
   return {
     DEFAULT_CONFIG, DIAS_ES, DIAS_ES_LARGO,
     isValidISO, isValidTime, dayOfWeek, addDays, diffDays, todayISO, formatDateES, weekStart,
-    timeToMinutes, hoursBetween, hoursOf, sumHours, round1,
+    timeToMinutes, hoursBetween, hoursOf, sumHours, round1, SEMAFORO, semaforo,
     easterSunday, nextMonday, colombianHolidays,
     normalizeConfig, isHoliday, isBusinessDay, businessDays, countBusinessDays,
     businessDaysElapsed, businessDaysRemaining, expectedHoursToDate,

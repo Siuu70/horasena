@@ -71,7 +71,11 @@
     ].join('');
     $('lbl-real').textContent = `${s.cumplidas} h (${s.porcentaje}%)`;
     $('lbl-total').textContent = `Meta ${c.totalHours} h`;
-    $('bar-real').style.width = s.porcentaje + '%';
+    const sem = C.semaforo(s.porcentaje);
+    const bar = $('bar-real');
+    bar.style.width = s.porcentaje + '%';
+    bar.className = 'sem-' + sem.level;
+    $('lbl-sem').innerHTML = `<span class="badge ${sem.level}">${sem.icon} ${esc(sem.label)}</span>`;
 
     const alerts = C.buildAlerts({ config: c, entries: state.entries, sessions: state.sessions, today: t });
     $('alertas').innerHTML = alerts.length ? alerts.map(a => `<div class="alert ${a.level}"><div class="t">${esc(a.title)}</div><div class="d">${esc(a.detail)}</div></div>`).join('') : '<p class="muted">Sin alertas.</p>';

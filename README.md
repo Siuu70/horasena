@@ -28,7 +28,7 @@ cd "control-horas"
 node --test
 ```
 
-Ejecuta las 24 pruebas de `calc.test.js` (días hábiles, horas esperadas, alertas, importación CSV,
+Ejecuta las 25 pruebas de `calc.test.js` (días hábiles, horas esperadas, alertas, importación CSV,
 importación del cronograma real guardado en `test-fixtures/cronograma_grid.json`).
 
 ## Uso rápido
