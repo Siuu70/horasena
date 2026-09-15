@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Control de horas — Contrato SENA</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <h1>Control de horas del contrato</h1>
+  <p id="header-sub">Ficha 3536507 · Análisis y Desarrollo de Software</p>
+</header>
+<nav>
+  <button data-tab="panel" class="active">Panel</button>
+  <button data-tab="registro">Registro</button>
+  <button data-tab="programacion">Programación</button>
+  <button data-tab="config">Configuración</button>
+</nav>
+<main>
+
+  <!-- ============================ PANEL ============================ -->
+  <section id="tab-panel" class="tab active">
+    <p class="muted" id="panel-fecha"></p>
+    <div class="grid" id="stats"></div>
+
+    <div class="card">
+      <div class="bar-label"><span><strong>Avance real</strong> <span id="lbl-real"></span></span><span id="lbl-total"></span></div>
+      <div class="bar"><span id="bar-real" style="width:0%"></span></div>
+    </div>
+
+    <h2>Calendario</h2>
+    <div class="card">
+      <div class="cal-head">
+        <button class="btn sec sm" id="cal-prev" type="button">‹</button>
+        <strong id="cal-title"></strong>
+        <button class="btn sec sm" id="cal-next" type="button">›</button>
+        <button class="btn sec sm" id="cal-hoy" type="button">Hoy</button>
+      </div>
+      <div class="cal" id="calendario"></div>
+      <div class="cal-leyenda">
+        <span><i class="registrado"></i> Registrado</span>
+        <span><i class="parcial"></i> Parcial</span>
+        <span><i class="sin_registro"></i> Sin registro</span>
+        <span><i class="programado"></i> Programado</span>
+        <span><i class="libre"></i> Hábil sin programar</span>
+        <span><i class="no_habil"></i> No hábil / festivo</span>
+      </div>
+      <p class="muted">Cada día muestra tus sesiones programadas (horario y competencia; el color de la franja es su estado: azul pendiente, verde cumplida, amarillo parcial, rojo no cumplida) y <b>✓</b> las horas ya registradas. Toca un día para registrar horas en esa fecha.</p>
+    </div>
+
+    <h2>Alertas</h2>
+    <div id="alertas"></div>
+  </section>
+
+  <!-- ============================ REGISTRO ============================ -->
+  <section id="tab-registro" class="tab">
+    <div class="card">
+      <h2 id="form-title">Registrar horas</h2>
+      <form id="form-registro">
+        <input type="hidden" id="e-id">
+        <div class="row">
+          <div><label>Fecha</label><input type="date" id="e-date" required></div>
+          <div><label>Hora inicio</label><input type="time" id="e-start" value="12:00" required></div>
+          <div><label>Hora fin</label><input type="time" id="e-end" value="20:00" required></div>
+          <div><label>Ficha</label><input type="text" id="e-ficha"></div>
+          <div><label>Actividad</label>
+            <select id="e-activity">
+              <option value="formacion">Formación directa</option>
+              <option value="otra">Otra actividad</option>
+            </select></div>
+        </div>
+        <div class="row"><div><label>Observaciones</label><textarea id="e-obs"></textarea></div></div>
+        <div class="actions">
+          <button type="submit" class="btn" id="btn-guardar">Guardar registro</button>
+          <button type="button" class="btn sec hidden" id="btn-cancelar">Cancelar edición</button>
+          <span class="muted" id="e-horas"></span>
+        </div>
+        <div id="form-msg"></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Marcar día completo según lo programado</h2>
+      <div class="actions">
+        <input type="date" id="q-date" style="max-width:180px">
+        <button class="btn sec" id="btn-dia-completo">Marcar día completo</button>
+      </div>
+      <p class="muted">Si el día tiene sesiones programadas, se registran tal cual (horario y competencia). Si no, se registra un día de <span id="q-hpd"></span> h desde la hora de inicio por defecto.</p>
+      <div id="q-msg"></div>
+    </div>
+
+    <h2>Registros <span class="muted" id="reg-total"></span></h2>
+    <div class="table-wrap"><table id="tabla-registros">
+      <thead><tr><th>Fecha</th><th>Horario</th><th>Horas</th><th>Ficha</th><th>Actividad</th><th>Observaciones</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </section>
+
+  <!-- ============================ PROGRAMACIÓN ============================ -->
+  <section id="tab-programacion" class="tab">
+    <div class="card">
+      <h2>Importar programación</h2>
+      <div class="row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
+        <div>
+          <label>Cronograma SENA (.xlsx) — se filtra por tu nombre</label>
+          <input type="file" id="file-xlsx" accept=".xlsx,.xlsm,.xls">
+        </div>
+        <div>
+          <label>CSV (fecha, hora_inicio, hora_fin, ficha, competencia, rap, actividad)</label>
+          <input type="file" id="file-csv" accept=".csv,.txt">
+        </div>
+      </div>
+      <div class="actions" style="margin-top:8px">
+        <label style="display:inline-flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="imp-solo-contrato" checked> Solo fechas dentro del contrato</label>
+        <label style="display:inline-flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="imp-reemplazar" checked> Reemplazar la programación actual</label>
+        <button class="btn sec" id="btn-precargada">Cargar programación incluida (cronograma del 14/09/2026)</button>
+      </div>
+      <div id="imp-msg"></div>
+    </div>
+
+    <div class="card">
+      <h2>Agregar sesión manual</h2>
+      <form id="form-sesion">
+        <div class="row">
+          <div><label>Fecha</label><input type="date" id="s-date" required></div>
+          <div><label>Inicio</label><input type="time" id="s-start" value="12:00" required></div>
+          <div><label>Fin</label><input type="time" id="s-end" value="20:00" required></div>
+          <div><label>Competencia / RAP</label><input type="text" id="s-comp" placeholder="Competencia / RAP"></div>
+        </div>
+        <button type="submit" class="btn sec">Agregar sesión</button>
+      </form>
+    </div>
+
+    <div class="actions" style="margin-bottom:8px">
+      <label style="display:inline-flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="ver-solo-contrato" checked> Ver solo el contrato</label>
+      <span class="muted" id="prog-total"></span>
+      <button class="btn danger sm" id="btn-borrar-prog">Borrar toda la programación</button>
+    </div>
+    <div id="tabla-programacion"></div>
+  </section>
+
+  <!-- ============================ CONFIGURACIÓN ============================ -->
+  <section id="tab-config" class="tab">
+    <div class="card">
+      <h2>Parámetros del contrato</h2>
+      <form id="form-config">
+        <div class="row">
+          <div><label>Fecha de inicio</label><input type="date" id="c-start" required></div>
+          <div><label>Fecha de fin</label><input type="date" id="c-end" required></div>
+          <div><label>Horas totales</label><input type="number" id="c-total" min="1" step="0.5" required></div>
+          <div><label>Horas por día</label><input type="number" id="c-hpd" min="0.5" max="24" step="0.5" required></div>
+          <div><label>Hora inicio por defecto</label><input type="time" id="c-defstart"></div>
+        </div>
+        <div class="row">
+          <div><label>Nombre en el cronograma</label><input type="text" id="c-name"></div>
+          <div><label>Ficha</label><input type="text" id="c-ficha"></div>
+          <div><label>Simular "hoy" (vacío = fecha real en America/Bogota)</label><input type="date" id="c-today"></div>
+        </div>
+        <label>Días hábiles</label>
+        <div class="checks" id="c-workdays"></div>
+        <div class="row" style="margin-top:10px">
+          <div>
+            <label>Festivos (uno por línea, AAAA-MM-DD)</label>
+            <textarea id="c-holidays" style="min-height:110px"></textarea>
+            <div class="actions" style="margin-top:6px">
+              <input type="number" id="c-year" style="max-width:110px" min="2000" max="2100">
+              <button type="button" class="btn sec sm" id="btn-festivos">Agregar festivos de Colombia del año</button>
+            </div>
+          </div>
+        </div>
+        <div class="actions"><button type="submit" class="btn">Guardar configuración</button><span id="c-msg"></span></div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Respaldo</h2>
+      <div class="actions">
+        <button class="btn sec" id="btn-export">Exportar respaldo JSON</button>
+        <label class="btn sec" style="margin:0;cursor:pointer">Importar respaldo JSON <input type="file" id="file-backup" accept=".json" class="hidden"></label>
+        <button class="btn danger" id="btn-reset">Borrar todos los datos</button>
+      </div>
+      <div id="backup-msg"></div>
+      <p class="muted">Los datos se guardan en este navegador (localStorage). Exporta un respaldo antes de cambiar de equipo o limpiar el navegador.</p>
+    </div>
+  </section>
+</main>
+<footer>Control de horas · SENA · zona horaria America/Bogota</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="calc.js"></script>
+<script src="programacion_3536507.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
