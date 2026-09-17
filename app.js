@@ -114,6 +114,13 @@
       return `<div class="${cls}" data-date="${c.estado === 'fuera' ? '' : c.date}" title="${esc(title)}"><span class="n">${c.day}${c.programadas ? ` <small>P ${c.programadas} h</small>` : ''}</span>${lineas.join('')}</div>`;
     }).join('');
     $('calendario').innerHTML = head + cells;
+    const ym = `${cal.year}-${String(cal.month).padStart(2, '0')}`;
+    const cargadas = state.sessions.some(x => x.date.slice(0, 7) === ym);
+    const enCronograma = (window.PROGRAMACION_PRECARGADA || []).filter(x => x.date.slice(0, 7) === ym).length;
+    $('cal-aviso').innerHTML = !cargadas && enCronograma
+      ? `<div class="msg err">Este mes no tiene sesiones cargadas, pero el cronograma incluido tiene ${enCronograma}. <button type="button" class="btn sec sm" id="cal-cargar">Cargar programación completa</button></div>`
+      : '';
+    const b = $('cal-cargar'); if (b) b.addEventListener('click', cargarPrecargada);
   }
   $('cal-prev').addEventListener('click', () => calShift(-1));
   $('cal-next').addEventListener('click', () => calShift(1));
@@ -231,9 +238,10 @@
   // ---------------------------------------------------------------------------
   // Programación
   // ---------------------------------------------------------------------------
-  function importSessions(nuevas, origen) {
+  function importSessions(nuevas, origen, opts) {
+    opts = opts || {};
     const c = cfg();
-    if ($('imp-solo-contrato').checked) nuevas = nuevas.filter(s => C.inContract(s.date, c));
+    if ($('imp-solo-contrato').checked && !opts.todo) nuevas = nuevas.filter(s => C.inContract(s.date, c));
     if (!nuevas.length) { msg('imp-msg', `No hay sesiones para importar desde ${origen} (revisa el filtro "solo contrato" y el nombre configurado).`, false); return; }
     if ($('imp-reemplazar').checked) state.sessions = nuevas;
     else {
@@ -277,10 +285,13 @@
     reader.readAsText(f, 'utf-8');
   });
 
-  $('btn-precargada').addEventListener('click', () => {
+  function cargarPrecargada() {
     const pre = (window.PROGRAMACION_PRECARGADA || []).map(s => C.makeSession(Object.assign({}, s)));
-    importSessions(pre, 'la programación incluida');
-  });
+    // Se carga completa (todos los meses) sin aplicar el filtro "solo contrato", para que el calendario muestre todo el cronograma.
+    $('imp-reemplazar').checked = true;
+    importSessions(pre, 'la programación incluida (cronograma completo, todos los meses)', { todo: true });
+  }
+  $('btn-precargada').addEventListener('click', cargarPrecargada);
 
   $('form-sesion').addEventListener('submit', ev => {
     ev.preventDefault();

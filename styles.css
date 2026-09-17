@@ -206,7 +206,7 @@ footer { text-align: center; color: var(--muted); font-size: 0.78rem; padding: 2
 .cal .day .reg { font-weight: 600; }
 .cal .day.hoy { border-color: var(--primary); box-shadow: 0 0 0 2px var(--primary), 0 0 0 5px rgba(31, 111, 74, 0.15); }  /* dos sombras superpuestas */
 .cal .day.fuera { background: #f7f9fb; color: #aab4bd; cursor: default; }
-.cal .day.fuera .ses { opacity: 0.55; }   /* opacidad (2.2.3) */
+.cal .day.fuera .ses { opacity: 0.8; }   /* opacidad (2.2.3) */
 .cal .day.registrado, .cal-leyenda i.registrado { background: var(--verde-bg); color: var(--verde); }
 .cal .day.parcial, .cal-leyenda i.parcial { background: var(--amarillo-bg); color: var(--amarillo); }
 .cal .day.sin_registro, .cal-leyenda i.sin_registro { background: var(--rojo-bg); color: var(--rojo); }
