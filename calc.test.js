@@ -250,7 +250,7 @@ test('fillMerges copia el valor ancla a todo el rango combinado', () => {
   assert.deepEqual(grid, [['a', 'a', 'a'], ['a', 'a', 'a']]);
 });
 
-test('cronograma real 3536507 (10): 47 días de 8 h, 5 dentro del contrato', () => {
+test('cronograma real 3536507 (11): 47 días de 8 h, 5 dentro del contrato', () => {
   const grid = JSON.parse(fs.readFileSync(path.join(__dirname, 'test-fixtures', 'cronograma_grid.json'), 'utf8'));
   const { sessions, errors } = C.parseCronogramaGrid(grid, 'RONALDO BALLESTEROS', { ficha: '3536507' });
   assert.deepEqual(errors, []);
@@ -258,7 +258,7 @@ test('cronograma real 3536507 (10): 47 días de 8 h, 5 dentro del contrato', () 
   assert.ok(sessions.every(s => s.hours === 8 && s.start === '12:00' && s.end === '20:00'));
   const cfg = C.normalizeConfig(CFG_LS);
   const sep = sessions.filter(s => C.inContract(s.date, cfg));
-  assert.deepEqual(sep.map(s => s.date), ['2026-09-15', '2026-09-18', '2026-09-24', '2026-09-25', '2026-09-26']);
+  assert.deepEqual(sep.map(s => s.date), ['2026-09-15', '2026-09-18', '2026-09-21', '2026-09-25', '2026-09-26']);
   assert.equal(sep[0].competencia.startsWith('Establecer requisitos'), true);
   assert.equal(sep[2].rap, 'EVALUAR RAP 01-02 Y 03');
   const s = C.summarize({ config: cfg, entries: [], sessions, today: '2026-09-14' });
@@ -268,6 +268,35 @@ test('cronograma real 3536507 (10): 47 días de 8 h, 5 dentro del contrato', () 
   assert.ok(alerts.some(a => a.code === 'programacion_insuficiente'));
   assert.ok(!alerts.some(a => a.code === 'sesion_no_habil'), 'con L-S el sábado 26 es hábil');
   assert.ok(!alerts.some(a => a.code === 'cruce_horarios'));
+});
+
+test('mergeSessions: reemplazar solo el contrato conserva los demás meses y los estados marcados', () => {
+  const cfg = C.normalizeConfig(CFG_LS);
+  const mk = (date, extra) => C.makeSession(Object.assign({ date, start: '12:00', end: '20:00', ficha: '3536507' }, extra));
+  // Programación vieja (10): jueves 24/09, ya con el 15/09 cumplido y una sesión de octubre.
+  const actuales = [mk('2026-09-15', { id: 'a1', status: 'cumplida' }), mk('2026-09-24', { id: 'a2' }), mk('2026-10-02', { id: 'a3', status: 'parcial' })];
+  // Cronograma nuevo (11), ya filtrado al contrato: el 24/09 pasó al 21/09.
+  const nuevas = [mk('2026-09-15'), mk('2026-09-21')];
+  const r = C.mergeSessions(actuales, nuevas, { replace: true, onlyContract: true, config: cfg });
+  assert.deepEqual(r.sessions.map(s => s.date).sort(), ['2026-09-15', '2026-09-21', '2026-10-02']);
+  assert.equal(r.importadas.length, 2);
+  const s15 = r.sessions.find(s => s.date === '2026-09-15');
+  assert.equal(s15.id, 'a1', 'hereda el id para no romper los registros enlazados');
+  assert.equal(s15.status, 'cumplida', 'conserva el estado ya marcado');
+  assert.equal(r.sessions.find(s => s.date === '2026-10-02').status, 'parcial', 'octubre no se toca');
+  assert.ok(!r.sessions.some(s => s.date === '2026-09-24'), 'la sesión movida desaparece');
+});
+
+test('mergeSessions: reemplazar todo y agregar sin duplicar', () => {
+  const mk = (date, extra) => C.makeSession(Object.assign({ date, start: '12:00', end: '20:00' }, extra));
+  const actuales = [mk('2026-09-15', { id: 'a1', status: 'cumplida' }), mk('2026-10-02', { id: 'a3' })];
+  const todo = C.mergeSessions(actuales, [mk('2026-09-15'), mk('2026-11-05')], { replace: true, onlyContract: false });
+  assert.deepEqual(todo.sessions.map(s => s.date), ['2026-09-15', '2026-11-05']);
+  assert.equal(todo.sessions[0].status, 'cumplida');
+  const add = C.mergeSessions(actuales, [mk('2026-09-15'), mk('2026-11-05')], { replace: false });
+  assert.equal(add.sessions.length, 3);
+  assert.equal(add.importadas.length, 1);
+  assert.equal(add.importadas[0].date, '2026-11-05');
 });
 
 test('registro rápido de día completo y validación', () => {

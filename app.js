@@ -241,16 +241,15 @@
   function importSessions(nuevas, origen, opts) {
     opts = opts || {};
     const c = cfg();
-    if ($('imp-solo-contrato').checked && !opts.todo) nuevas = nuevas.filter(s => C.inContract(s.date, c));
+    const soloContrato = $('imp-solo-contrato').checked && !opts.todo;
+    if (soloContrato) nuevas = nuevas.filter(s => C.inContract(s.date, c));
     if (!nuevas.length) { msg('imp-msg', `No hay sesiones para importar desde ${origen} (revisa el filtro "solo contrato" y el nombre configurado).`, false); return; }
-    if ($('imp-reemplazar').checked) state.sessions = nuevas;
-    else {
-      const existe = s => state.sessions.some(x => x.date === s.date && x.start === s.start && x.end === s.end);
-      nuevas = nuevas.filter(s => !existe(s));
-      state.sessions.push(...nuevas);
-    }
+    // Al reemplazar solo se sustituye el rango importado (el contrato si está filtrado) y se conservan
+    // los estados ya marcados en sesiones que coinciden en fecha y horario.
+    const r = C.mergeSessions(state.sessions, nuevas, { replace: $('imp-reemplazar').checked, onlyContract: soloContrato, config: c });
+    state.sessions = r.sessions;
     save();
-    msg('imp-msg', `Importadas ${nuevas.length} sesiones (${C.sumHours(nuevas)} h) desde ${origen}.`, true);
+    msg('imp-msg', `Importadas ${r.importadas.length} sesiones (${C.sumHours(r.importadas)} h) desde ${origen}. Programación actual: ${state.sessions.length} sesiones.`, true);
   }
 
   $('file-xlsx').addEventListener('change', ev => {

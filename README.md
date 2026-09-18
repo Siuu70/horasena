@@ -28,7 +28,7 @@ cd "control-horas"
 node --test
 ```
 
-Ejecuta las 25 pruebas de `calc.test.js` (días hábiles, horas esperadas, alertas, importación CSV,
+Ejecuta las 27 pruebas de `calc.test.js` (días hábiles, horas esperadas, alertas, importación CSV,
 importación del cronograma real guardado en `test-fixtures/cronograma_grid.json`).
 
 ## Uso rápido
@@ -37,8 +37,10 @@ importación del cronograma real guardado en `test-fixtures/cronograma_grid.json
    días hábiles y festivos. El botón *Agregar festivos de Colombia del año* calcula los festivos
    con la ley Emiliani (Semana Santa incluida). El campo *Simular "hoy"* sirve para probar escenarios.
 2. **Programación**: la primera vez la app carga sola tus 47 sesiones del cronograma; si las borras, puedes volver con *Cargar programación incluida* (las 47 sesiones de RONALDO BALLESTEROS
-   extraídas del cronograma `(10)` del 14/09/2026), o importa el `.xlsx` del cronograma (se filtra por
-   el nombre configurado) o un CSV con columnas `fecha, hora_inicio, hora_fin, ficha, competencia, rap, actividad`.
+   extraídas del cronograma `(11)` del 18/09/2026), o importa el `.xlsx` del cronograma (se filtra por
+   el nombre configurado). Al importar con *Reemplazar* se sustituye solo el rango importado (el contrato, si
+   está marcado *Solo fechas dentro del contrato*), se conservan los demás meses y las sesiones que coinciden en
+   fecha y horario mantienen su estado (cumplida / parcial) y sus registros o un CSV con columnas `fecha, hora_inicio, hora_fin, ficha, competencia, rap, actividad`.
    Marca cada sesión como cumplida / parcial / no cumplida; *Registrar N h* crea el registro de horas
    directamente desde la sesión.
 3. **Registro**: anota las horas por día (fecha, inicio, fin, ficha, actividad, observaciones), edítalas
@@ -58,7 +60,7 @@ importación del cronograma real guardado en `test-fixtures/cronograma_grid.json
 | `calc.js` | Toda la lógica de cálculo, pura (sin DOM): días hábiles, horas esperadas, resumen, alertas, festivos, parseo CSV y del cronograma. Funciona en navegador y en Node |
 | `calc.test.js` | Pruebas unitarias (`node --test`) |
 | `app.js` | Estado, `localStorage`, render y eventos de la interfaz |
-| `programacion_3536507.js` | Programación precargada extraída del cronograma (10) |
+| `programacion_3536507.js` | Programación precargada extraída del cronograma (11) |
 | `test-fixtures/cronograma_grid.json` | Cuadrícula del cronograma real usada por las pruebas |
 
 La única dependencia externa es SheetJS (CDN) para leer `.xlsx`; si no hay internet, el resto de la app
@@ -66,7 +68,7 @@ funciona igual (CSV y programación incluida no la necesitan).
 
 ## Nota sobre los días hábiles
 
-El cronograma (10) programa sesiones también los sábados (p. ej. 26/09/2026), por eso la configuración
+El cronograma (11) programa sesiones también los sábados (p. ej. 26/09/2026), por eso la configuración
 por defecto cuenta lunes a sábado (15 días hábiles en el contrato; el esperado se limita a 104 h).
 Si tu contrato se mide solo de lunes a viernes (13 días × 8 h = 104 h), desmarca *Sábado* en
 Configuración → Días hábiles; ambos escenarios están cubiertos por las pruebas.

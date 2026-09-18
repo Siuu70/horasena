@@ -579,6 +579,36 @@
     return grid;
   }
 
+  /**
+   * Combina la programación actual con sesiones importadas.
+   *  - replace: quita las sesiones actuales del rango importado (solo el contrato si onlyContract, si no todas) y pone las nuevas.
+   *    Las sesiones fuera del rango se conservan, así importar un cronograma filtrado no borra los demás meses.
+   *  - sin replace: agrega solo las sesiones que no existían (misma fecha, inicio y fin).
+   *  Una sesión nueva que coincide con una existente (fecha, inicio, fin) hereda su id y estado, para no perder
+   *  las marcas cumplida/parcial ni los registros de horas enlazados por sessionId.
+   *  Devuelve { sessions, importadas } donde importadas son las sesiones nuevas efectivamente incorporadas.
+   */
+  function mergeSessions(actuales, nuevas, opts) {
+    opts = opts || {};
+    actuales = Array.isArray(actuales) ? actuales : [];
+    nuevas = Array.isArray(nuevas) ? nuevas : [];
+    const cfg = normalizeConfig(opts.config);
+    const key = s => s.date + '|' + s.start + '|' + s.end;
+    const enRango = s => !opts.onlyContract || inContract(s.date, cfg);
+    const previas = {};
+    actuales.forEach(s => { previas[key(s)] = s; });
+    const heredar = s => {
+      const prev = previas[key(s)];
+      return prev ? Object.assign({}, s, { id: prev.id, status: prev.status || s.status }) : s;
+    };
+    if (opts.replace) {
+      const importadas = nuevas.map(heredar);
+      return { sessions: actuales.filter(s => !enRango(s)).concat(importadas), importadas };
+    }
+    const importadas = nuevas.filter(s => !previas[key(s)]);
+    return { sessions: actuales.concat(importadas), importadas };
+  }
+
   // ---------------------------------------------------------------------------
   // Utilidades
   // ---------------------------------------------------------------------------
@@ -616,7 +646,7 @@
     normalizeConfig, isHoliday, isBusinessDay, businessDays, countBusinessDays,
     businessDaysElapsed, businessDaysRemaining, expectedHoursToDate,
     inContract, overlaps, groupByDate, summarize, buildAlerts, calendarMonth,
-    cellToISO, normalizeTime, parseCSV, parseCronogramaGrid, parseCellText, fillMerges, makeSession,
+    cellToISO, normalizeTime, parseCSV, parseCronogramaGrid, parseCellText, fillMerges, makeSession, mergeSessions,
     uid, entryFromSession, fullDayEntry, validateEntry,
   };
 });

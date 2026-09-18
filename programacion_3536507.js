@@ -1,4 +1,4 @@
-// Programación de RONALDO BALLESTEROS extraída del cronograma "3536507 - ANALISIS Y DESARROLLO SOFTWARE (10).xlsx" (14/09/2026).
+// Programación de RONALDO BALLESTEROS extraída del cronograma "1. 3536507 - ANALISIS Y DESARROLLO SOFTWARE (11).xlsx" (18/09/2026).
 // Se carga con el botón "Cargar programación incluida" de la pestaña Programación.
 window.PROGRAMACION_PRECARGADA = [
  {
@@ -35,7 +35,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-09-24",
+  "date": "2026-09-21",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
