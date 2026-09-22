@@ -1,4 +1,4 @@
-// Programación de RONALDO BALLESTEROS extraída del cronograma "1. 3536507 - ANALISIS Y DESARROLLO SOFTWARE (11).xlsx" (18/09/2026).
+// Programación de RONALDO BALLESTEROS extraída del cronograma "1. 3536507 - ANALISIS Y DESARROLLO SOFTWARE (12).xlsx" (22/09/2026).
 // Se carga con el botón "Cargar programación incluida" de la pestaña Programación.
 window.PROGRAMACION_PRECARGADA = [
  {
@@ -48,7 +48,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-09-25",
+  "date": "2026-09-24",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -61,7 +61,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-09-26",
+  "date": "2026-09-25",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -74,7 +74,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-02",
+  "date": "2026-09-26",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -87,7 +87,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-06",
+  "date": "2026-10-02",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -100,7 +100,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-07",
+  "date": "2026-10-05",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -113,7 +113,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-08",
+  "date": "2026-10-07",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -126,7 +126,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-09",
+  "date": "2026-10-08",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -139,7 +139,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-13",
+  "date": "2026-10-09",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -152,7 +152,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-16",
+  "date": "2026-10-13",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -165,7 +165,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-17",
+  "date": "2026-10-16",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -178,7 +178,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-21",
+  "date": "2026-10-17",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -191,7 +191,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-22",
+  "date": "2026-10-21",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -204,7 +204,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-23",
+  "date": "2026-10-22",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -217,7 +217,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-24",
+  "date": "2026-10-23",
   "start": "12:00",
   "end": "20:00",
   "hours": 8
@@ -230,7 +230,7 @@ window.PROGRAMACION_PRECARGADA = [
   "competencia": "Diseñar la solución de software de acuerdo con procedimientos y requisitos técnico",
   "rap": "EVALUAR RAP 01-02 Y 03",
   "ambiente": "",
-  "date": "2026-10-26",
+  "date": "2026-10-24",
   "start": "12:00",
   "end": "20:00",
   "hours": 8

@@ -250,7 +250,7 @@ test('fillMerges copia el valor ancla a todo el rango combinado', () => {
   assert.deepEqual(grid, [['a', 'a', 'a'], ['a', 'a', 'a']]);
 });
 
-test('cronograma real 3536507 (11): 47 días de 8 h, 5 dentro del contrato', () => {
+test('cronograma real 3536507 (12): 47 días de 8 h, 6 dentro del contrato', () => {
   const grid = JSON.parse(fs.readFileSync(path.join(__dirname, 'test-fixtures', 'cronograma_grid.json'), 'utf8'));
   const { sessions, errors } = C.parseCronogramaGrid(grid, 'RONALDO BALLESTEROS', { ficha: '3536507' });
   assert.deepEqual(errors, []);
@@ -258,16 +258,29 @@ test('cronograma real 3536507 (11): 47 días de 8 h, 5 dentro del contrato', () 
   assert.ok(sessions.every(s => s.hours === 8 && s.start === '12:00' && s.end === '20:00'));
   const cfg = C.normalizeConfig(CFG_LS);
   const sep = sessions.filter(s => C.inContract(s.date, cfg));
-  assert.deepEqual(sep.map(s => s.date), ['2026-09-15', '2026-09-18', '2026-09-21', '2026-09-25', '2026-09-26']);
+  assert.deepEqual(sep.map(s => s.date), ['2026-09-15', '2026-09-18', '2026-09-21', '2026-09-24', '2026-09-25', '2026-09-26']);
   assert.equal(sep[0].competencia.startsWith('Establecer requisitos'), true);
   assert.equal(sep[2].rap, 'EVALUAR RAP 01-02 Y 03');
   const s = C.summarize({ config: cfg, entries: [], sessions, today: '2026-09-14' });
-  assert.equal(s.programadasTotal, 40);
-  assert.equal(s.programadasPendientes, 40);
+  assert.equal(s.programadasTotal, 48);
+  assert.equal(s.programadasPendientes, 48);
   const alerts = C.buildAlerts({ config: cfg, entries: [], sessions, today: '2026-09-14' });
   assert.ok(alerts.some(a => a.code === 'programacion_insuficiente'));
   assert.ok(!alerts.some(a => a.code === 'sesion_no_habil'), 'con L-S el sábado 26 es hábil');
   assert.ok(!alerts.some(a => a.code === 'cruce_horarios'));
+  // (12): el 06/10 pasó al 05/10 y el 26/10 al 24/09.
+  const fechas = sessions.map(s => s.date);
+  assert.ok(fechas.includes('2026-10-05') && !fechas.includes('2026-10-06') && !fechas.includes('2026-10-26'));
+});
+
+test('mergeSessions: importar el cronograma completo actualiza también los meses fuera del contrato', () => {
+  const mk = (date, extra) => C.makeSession(Object.assign({ date, start: '12:00', end: '20:00', ficha: '3536507' }, extra));
+  // Programación cargada del (11) y cronograma nuevo (12): 06/10 → 05/10 y 26/10 → 24/09.
+  const actuales = [mk('2026-09-15', { id: 'a1', status: 'cumplida' }), mk('2026-10-06', { id: 'a2' }), mk('2026-10-26', { id: 'a3' })];
+  const nuevas = [mk('2026-09-15'), mk('2026-09-24'), mk('2026-10-05')];
+  const r = C.mergeSessions(actuales, nuevas, { replace: true, onlyContract: false, config: C.normalizeConfig(CFG_LS) });
+  assert.deepEqual(r.sessions.map(s => s.date).sort(), ['2026-09-15', '2026-09-24', '2026-10-05']);
+  assert.equal(r.sessions.find(s => s.date === '2026-09-15').status, 'cumplida');
 });
 
 test('mergeSessions: reemplazar solo el contrato conserva los demás meses y los estados marcados', () => {
