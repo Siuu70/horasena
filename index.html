@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-v="20260928152207">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -7,7 +7,21 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
-  <link rel="stylesheet" href="styles.css">
+  <script>
+    // Actualización automática: version.json se pide sin caché; si el servidor tiene una versión más nueva
+    // que esta página (guardada en caché por el navegador), se recarga con ?v=<versión> para traer la nueva.
+    // Sin conexión o abierta con doble clic (file://) simplemente sigue con lo que tiene.
+    (function () {
+      if (!window.fetch || location.protocol === 'file:') return;
+      var actual = document.documentElement.getAttribute('data-v');
+      fetch('version.json', { cache: 'no-store' }).then(function (r) { return r.json(); }).then(function (j) {
+        if (!j || !j.v || j.v === actual) return;
+        if (new URLSearchParams(location.search).get('v') === j.v) return; // ya se intentó: evita recargar en bucle
+        location.replace(location.pathname + '?v=' + encodeURIComponent(j.v) + location.hash);
+      }).catch(function () {});
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css?v=20260928152207">
 </head>
 <body>
 <header>
@@ -200,9 +214,9 @@
 <footer>Control de horas · SENA · zona horaria America/Bogota</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="calc.js"></script>
-<script src="programacion_3536507.js"></script>
-<script src="programacion_complementarias.js"></script>
-<script src="app.js"></script>
+<script src="calc.js?v=20260928152207"></script>
+<script src="programacion_3536507.js?v=20260928152207"></script>
+<script src="programacion_complementarias.js?v=20260928152207"></script>
+<script src="app.js?v=20260928152207"></script>
 </body>
 </html>

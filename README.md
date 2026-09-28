@@ -69,10 +69,18 @@ importación del cronograma real guardado en `test-fixtures/cronograma_grid.json
 | `app.js` | Estado, `localStorage`, render y eventos de la interfaz |
 | `programacion_3536507.js` | Programación precargada extraída del cronograma (12) |
 | `programacion_complementarias.js` | Sesiones precargadas de las formaciones complementarias (3626326 y 3622710) |
+| `version.sh`, `version.json` | Versión de los archivos para que el navegador no use copias viejas |
 | `test-fixtures/cronograma_grid.json` | Cuadrícula del cronograma real usada por las pruebas |
 
 La única dependencia externa es SheetJS (CDN) para leer `.xlsx`; si no hay internet, el resto de la app
 funciona igual (CSV y programación incluida no la necesitan).
+
+## Actualización automática (GitHub Pages)
+
+Cada commit pone una versión nueva (fecha y hora) en `index.html` y `version.json` mediante `version.sh`,
+que corre solo gracias al hook `pre-commit`. Al abrir la página, se consulta `version.json` sin caché: si hay una
+versión más nueva que la guardada por el navegador, la página se recarga sola y los archivos `?v=…` se descargan
+de nuevo. En un equipo nuevo, después de clonar, instala el hook una vez con `sh version.sh --install`.
 
 ## Nota sobre los días hábiles
 
