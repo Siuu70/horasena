@@ -81,10 +81,10 @@
   function isValidTime(t) { return typeof t === 'string' && /^\d{2}:\d{2}$/.test(t) && +t.slice(0, 2) < 24 && +t.slice(3) < 60; }
   function timeToMinutes(t) { const [h, m] = t.split(':').map(Number); return h * 60 + m; }
 
-  /** Horas decimales entre dos 'HH:MM'. Devuelve 0 si el rango es inválido. */
+  /** Horas decimales entre dos 'HH:MM'. Devuelve 0 si el rango es inválido. Un fin '23:59' cuenta como medianoche (24:00). */
   function hoursBetween(start, end) {
     if (!isValidTime(start) || !isValidTime(end)) return 0;
-    const mins = timeToMinutes(end) - timeToMinutes(start);
+    const mins = (end === '23:59' ? 24 * 60 : timeToMinutes(end)) - timeToMinutes(start);
     return mins > 0 ? Math.round((mins / 60) * 100) / 100 : 0;
   }
 
@@ -510,7 +510,7 @@
   }
 
   function makeSession(s) {
-    return Object.assign({ id: uid(), status: 'pendiente', activity: 'formacion', ficha: '', competencia: '', rap: '', ambiente: '' }, s, { hours: hoursBetween(s.start, s.end) });
+    return Object.assign({ id: uid(), status: 'pendiente', activity: 'formacion', ficha: '', programa: '', competencia: '', rap: '', ambiente: '' }, s, { hours: hoursBetween(s.start, s.end) });
   }
 
   // ---------------------------------------------------------------------------
@@ -552,9 +552,31 @@
     });
     const out = sessions.map(s => {
       const parsed = parseCellText(s.text);
-      return makeSession({ date: s.date, start: s.start, end: s.end, ficha: opts.ficha || '', competencia: parsed.competencia, rap: parsed.rap, ambiente: '' });
+      return makeSession({ date: s.date, start: s.start, end: s.end, ficha: opts.ficha || '', programa: opts.programa || '', competencia: parsed.competencia, rap: parsed.rap, ambiente: '' });
     });
     return { sessions: out, errors: out.length ? [] : ['No se encontraron sesiones para "' + instructorName + '"'] };
+  }
+
+  /**
+   * Ficha y programa de un cronograma. La ficha se toma primero del nombre del archivo
+   * ('2. 3622710 - OPERACIONES COMERCIALES.xlsx'), porque algunas plantillas traen en la celda
+   * 'Ficha:' la ficha de otro grupo; si el nombre no la tiene, se usa la celda. El programa sale
+   * de la celda 'Programa:' (primera línea) o, si no está, del nombre del archivo.
+   */
+  function cronogramaMeta(grid, fileName) {
+    const nombre = String(fileName || '').replace(/\.[^.]+$/, '');
+    let ficha = (nombre.match(/\b(\d{6,8})\b/) || [])[1] || '', programa = '';
+    const vecino = (row, c) => { for (let k = c + 1; k < row.length; k++) if (row[k] != null && row[k] !== '') return row[k]; return null; };
+    for (let r = 0; r < Math.min(grid.length, 15) && (!ficha || !programa); r++) {
+      const row = grid[r] || [];
+      for (let c = 0; c < row.length; c++) {
+        const v = typeof row[c] === 'string' ? row[c].trim().toLowerCase() : '';
+        if (!ficha && /^ficha\s*:/.test(v)) { const f = vecino(row, c); if (f != null) ficha = String(Math.round(Number(f)) || f).trim(); }
+        if (!programa && /^programa\s*:/.test(v)) { const p = vecino(row, c); if (p != null) programa = String(p).split(/\r?\n/)[0].trim().replace(/\.$/, ''); }
+      }
+    }
+    if (!programa) programa = nombre.replace(/^[\d.\s]*\d{6,8}\s*-\s*/, '').replace(/\s*\(\d+\)\s*$/, '').trim();
+    return { ficha, programa };
   }
 
   /** 'NOMBRE - Competencia / nota' → {competencia, rap} */
@@ -583,6 +605,8 @@
    * Combina la programación actual con sesiones importadas.
    *  - replace: quita las sesiones actuales del rango importado (solo el contrato si onlyContract, si no todas) y pone las nuevas.
    *    Las sesiones fuera del rango se conservan, así importar un cronograma filtrado no borra los demás meses.
+   *    Solo se reemplazan las fichas que vienen en la importación: importar una formación complementaria
+   *    no borra la programación de la ficha principal ni la de las otras complementarias.
    *  - sin replace: agrega solo las sesiones que no existían (misma fecha, inicio y fin).
    *  Una sesión nueva que coincide con una existente (fecha, inicio, fin) hereda su id y estado, para no perder
    *  las marcas cumplida/parcial ni los registros de horas enlazados por sessionId.
@@ -593,8 +617,11 @@
     actuales = Array.isArray(actuales) ? actuales : [];
     nuevas = Array.isArray(nuevas) ? nuevas : [];
     const cfg = normalizeConfig(opts.config);
-    const key = s => s.date + '|' + s.start + '|' + s.end;
-    const enRango = s => !opts.onlyContract || inContract(s.date, cfg);
+    const fichaDe = s => String(s.ficha || cfg.ficha || '');
+    const key = s => fichaDe(s) + '|' + s.date + '|' + s.start + '|' + s.end;
+    const fichasNuevas = {};
+    nuevas.forEach(s => { fichasNuevas[fichaDe(s)] = true; });
+    const enRango = s => fichasNuevas[fichaDe(s)] && (!opts.onlyContract || inContract(s.date, cfg));
     const previas = {};
     actuales.forEach(s => { previas[key(s)] = s; });
     const heredar = s => {
@@ -646,7 +673,7 @@
     normalizeConfig, isHoliday, isBusinessDay, businessDays, countBusinessDays,
     businessDaysElapsed, businessDaysRemaining, expectedHoursToDate,
     inContract, overlaps, groupByDate, summarize, buildAlerts, calendarMonth,
-    cellToISO, normalizeTime, parseCSV, parseCronogramaGrid, parseCellText, fillMerges, makeSession, mergeSessions,
+    cellToISO, normalizeTime, parseCSV, parseCronogramaGrid, cronogramaMeta, parseCellText, fillMerges, makeSession, mergeSessions,
     uid, entryFromSession, fullDayEntry, validateEntry,
   };
 });

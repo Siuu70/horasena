@@ -23,6 +23,7 @@
   --amarillo: #8a5a00; --amarillo: hsl(39, 100%, 27%); --amarillo-bg: #fff4d6; --amarillo-bg: hsl(44, 100%, 92%);
   --verde: #1b6b3a;    --verde: hsl(143, 60%, 26%);   --verde-bg: #e3f5ea;    --verde-bg: hsl(143, 47%, 93%);
   --azul: #1d4f91;     --azul: hsl(214, 67%, 34%);    --azul-bg: #e4eefb;     --azul-bg: hsl(214, 74%, 94%);
+  --morado: #6f3587;   --morado: hsl(282, 45%, 37%);  --morado-bg: #f6ecfb;   --morado-bg: hsl(282, 70%, 95%);   /* formaciones complementarias */
   --radius: 12px;
   --sombra: 0 1px 2px rgba(31, 41, 51, 0.06), 0 4px 12px rgba(31, 41, 51, 0.05);   /* sombras múltiples (2.3.2) */
   --sombra-alta: 0 2px 4px rgba(31, 41, 51, 0.08), 0 10px 24px rgba(31, 41, 51, 0.10);
@@ -123,6 +124,7 @@ h2:first-child { margin-top: 0; }
 .badge.amarillo { background: var(--amarillo-bg); color: var(--amarillo); }
 .badge.verde { background: var(--verde-bg); color: var(--verde); }
 .badge.gris { background: #e9edf1; color: var(--muted); }
+.badge.comp { background: var(--morado-bg); color: var(--morado); }
 
 /* ---- Formularios: selectores de atributos (2.1.1) y foco con transición ---- */
 form .row { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 10px; }
@@ -200,6 +202,7 @@ footer { text-align: center; color: var(--muted); font-size: 0.78rem; padding: 2
 .cal .day .n small { font-weight: 400; color: var(--muted); font-size: 0.68rem; }
 .cal .day .h { font-size: 0.72rem; line-height: 1.2; }
 .cal .day .ses { background: rgba(29, 79, 145, 0.1); border-left: 3px solid var(--azul); border-radius: 3px; padding: 1px 3px; color: var(--azul); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cal .day .ses.comp { border-left-color: var(--morado); color: var(--morado); background: var(--morado-bg); }  /* el estado (abajo) prevalece */
 .cal .day .ses.cumplida { border-left-color: var(--verde); color: var(--verde); background: rgba(27, 107, 58, 0.1); }
 .cal .day .ses.parcial { border-left-color: hsl(44, 100%, 44%); color: var(--amarillo); background: rgba(224, 168, 0, 0.12); }
 .cal .day .ses.no_cumplida { border-left-color: var(--rojo); color: var(--rojo); background: rgba(180, 35, 24, 0.08); text-decoration: line-through; }
@@ -213,6 +216,7 @@ footer { text-align: center; color: var(--muted); font-size: 0.78rem; padding: 2
 .cal .day.programado, .cal-leyenda i.programado { background: var(--azul-bg); color: var(--azul); }
 .cal .day.libre, .cal-leyenda i.libre { background: #fff; }
 .cal .day.no_habil, .cal-leyenda i.no_habil { background: #ebeef1; color: var(--muted); }
+.cal-leyenda i.comp { background: var(--morado-bg); border-left: 3px solid var(--morado); }
 .cal-leyenda { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; font-size: 0.78rem; color: var(--muted); }
 .cal-leyenda i { display: inline-block; width: 12px; height: 12px; border: 1px solid var(--line); border-radius: 3px; vertical-align: -2px; margin-right: 3px; }
 

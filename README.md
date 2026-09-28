@@ -28,7 +28,7 @@ cd "control-horas"
 node --test
 ```
 
-Ejecuta las 28 pruebas de `calc.test.js` (días hábiles, horas esperadas, alertas, importación CSV,
+Ejecuta las 32 pruebas de `calc.test.js` (días hábiles, horas esperadas, alertas, importación CSV,
 importación del cronograma real guardado en `test-fixtures/cronograma_grid.json`).
 
 ## Uso rápido
@@ -43,6 +43,13 @@ importación del cronograma real guardado en `test-fixtures/cronograma_grid.json
    fecha y horario mantienen su estado (cumplida / parcial) y sus registros o un CSV con columnas `fecha, hora_inicio, hora_fin, ficha, competencia, rap, actividad`.
    Marca cada sesión como cumplida / parcial / no cumplida; *Registrar N h* crea el registro de horas
    directamente desde la sesión.
+   **Formaciones complementarias**: además de la ficha principal (Configuración → *Ficha principal*), la app maneja
+   las fichas complementarias donde aparece tu nombre. Ya vienen incluidas las de `3626326` (Mantenimiento de equipos
+   de aire acondicionado y refrigeración, 6 sesiones) y `3622710` (Operaciones comerciales, 2 sesiones); si ya tenías datos,
+   el calendario y la pestaña Programación muestran el botón *Agregar formaciones complementarias*. Para una nueva,
+   importa su `.xlsx` (puedes elegir varios a la vez): la ficha se toma del nombre del archivo, solo se toman las franjas
+   con tu nombre y cada archivo solo reemplaza las sesiones de su ficha. En el calendario se marcan con ◆ y color morado;
+   en Programación hay filtro por ficha y total de horas por ficha. Todas cuentan para las horas del contrato.
 3. **Registro**: anota las horas por día (fecha, inicio, fin, ficha, actividad, observaciones), edítalas
    o elimínalas. *Marcar día completo* registra las sesiones programadas de ese día (o 8 h desde la
    hora de inicio por defecto si no hay programación).
@@ -61,6 +68,7 @@ importación del cronograma real guardado en `test-fixtures/cronograma_grid.json
 | `calc.test.js` | Pruebas unitarias (`node --test`) |
 | `app.js` | Estado, `localStorage`, render y eventos de la interfaz |
 | `programacion_3536507.js` | Programación precargada extraída del cronograma (12) |
+| `programacion_complementarias.js` | Sesiones precargadas de las formaciones complementarias (3626326 y 3622710) |
 | `test-fixtures/cronograma_grid.json` | Cuadrícula del cronograma real usada por las pruebas |
 
 La única dependencia externa es SheetJS (CDN) para leer `.xlsx`; si no hay internet, el resto de la app

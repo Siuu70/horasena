@@ -362,3 +362,50 @@ test('semáforo de avance: rojo < 33 %, amarillo 33-67 %, verde > 67 %', () => {
   assert.equal(C.semaforo(100).label, 'Meta cumplida');
   assert.equal(C.semaforo('abc').level, 'rojo');
 });
+
+// ---------------------------------------------------------------------------
+// Formaciones complementarias
+// ---------------------------------------------------------------------------
+test('una franja que termina a las 23:59 cuenta como hora completa', () => {
+  assert.equal(C.hoursBetween('16:00', '23:59'), 8);
+  assert.equal(C.hoursBetween('23:00', '23:59'), 1);
+});
+
+test('cronogramaMeta: ficha del nombre del archivo y programa de la celda', () => {
+  const grid = [['PROGRAMADOR SESIONES FORMATIVAS - AÑO 2026'], [null], [null, 'Ficha:  ', 3622710], [null, 'Programa:', 'MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION']];
+  // La plantilla de 3626326 trae en la celda la ficha de otro grupo: manda el nombre del archivo.
+  assert.deepEqual(C.cronogramaMeta(grid, '1. 3626326 - MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION.xlsx'),
+    { ficha: '3626326', programa: 'MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION' });
+  assert.equal(C.cronogramaMeta(grid, 'cronograma.xlsx').ficha, '3622710', 'sin ficha en el nombre usa la celda');
+  assert.deepEqual(C.cronogramaMeta([], '2. 3622710 - OPERACIONES COMERCIALES.xlsx'), { ficha: '3622710', programa: 'OPERACIONES COMERCIALES' });
+  assert.equal(C.cronogramaMeta([[null, 'Programa:', 'ANÁLISIS Y DESARROLLO DE SOFTWARE.\nFLORENCIA']], 'x.xlsx').programa, 'ANÁLISIS Y DESARROLLO DE SOFTWARE');
+});
+
+test('mergeSessions: importar una complementaria no borra la ficha principal ni las demás', () => {
+  const mk = (date, ficha, extra) => C.makeSession(Object.assign({ date, start: '12:00', end: '20:00', ficha }, extra));
+  const actuales = [mk('2026-09-15', '3536507', { id: 'p1', status: 'cumplida' }), mk('2026-10-26', '3622710', { id: 'c1' }), mk('2026-10-06', '3626326', { id: 'm1', status: 'parcial' })];
+  const nuevas = [mk('2026-10-30', '3622710'), mk('2026-10-06', '3626326')];
+  const r = C.mergeSessions(actuales, nuevas, { replace: true, config: C.normalizeConfig(CFG_LS) });
+  assert.deepEqual(r.sessions.map(s => s.ficha + ' ' + s.date).sort(), ['3536507 2026-09-15', '3622710 2026-10-30', '3626326 2026-10-06']);
+  assert.equal(r.sessions.find(s => s.ficha === '3536507').status, 'cumplida', 'la ficha principal no se toca');
+  assert.equal(r.sessions.find(s => s.ficha === '3626326').id, 'm1', 'hereda id y estado dentro de la misma ficha');
+  // Una sesión de otra ficha con la misma fecha y hora no hereda el estado.
+  const otra = C.mergeSessions(actuales, [mk('2026-09-15', '3622710')], { replace: false, config: C.normalizeConfig(CFG_LS) });
+  assert.equal(otra.importadas.length, 1);
+});
+
+test('programación incluida: las complementarias no se cruzan con la ficha principal', () => {
+  global.window = {};
+  eval(fs.readFileSync(path.join(__dirname, 'programacion_3536507.js'), 'utf8'));
+  eval(fs.readFileSync(path.join(__dirname, 'programacion_complementarias.js'), 'utf8'));
+  const todas = global.window.PROGRAMACION_PRECARGADA;
+  delete global.window;
+  const comp = todas.filter(s => s.ficha !== '3536507');
+  assert.equal(todas.length - comp.length, 47);
+  assert.deepEqual(comp.map(s => s.ficha + ' ' + s.date), [
+    '3626326 2026-10-06', '3626326 2026-10-14', '3626326 2026-10-20', '3626326 2026-10-28', '3626326 2026-11-18', '3626326 2026-11-30',
+    '3622710 2026-10-26', '3622710 2026-10-30']);
+  assert.equal(C.sumHours(comp), 64);
+  comp.forEach(s => assert.ok(!todas.some(p => p !== s && C.overlaps(p, s)), 'cruce el ' + s.date));
+  assert.equal(new Set(todas.map(s => s.id)).size, todas.length, 'ids únicos');
+});

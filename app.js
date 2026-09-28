@@ -38,6 +38,28 @@
   const cfg = () => state.config;
   const fmt = C.formatDateES;
   const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+  // Fichas: la principal es la de Configuración; las demás son formaciones complementarias.
+  const fichaDe = s => String((s && s.ficha) || cfg().ficha || '');
+  const esComplementaria = s => fichaDe(s) !== String(cfg().ficha || '');
+  /** { ficha: programa } con todas las fichas conocidas (programación actual, incluida y configuración). */
+  function fichasConocidas() {
+    const map = {};
+    if (cfg().ficha) map[cfg().ficha] = '';
+    (window.PROGRAMACION_PRECARGADA || []).concat(state.sessions).forEach(s => { const f = fichaDe(s); if (f && !map[f]) map[f] = s.programa || ''; });
+    return map;
+  }
+  function nombreFicha(f) {
+    const p = fichasConocidas()[f];
+    return f + (p ? ' · ' + p.charAt(0) + p.slice(1).toLowerCase() : '') + (f === String(cfg().ficha) ? ' (principal)' : ' (complementaria)');
+  }
+  /** Fichas de la programación incluida que todavía no están cargadas. */
+  function fichasFaltantes() {
+    const cargadas = {};
+    state.sessions.forEach(s => { cargadas[fichaDe(s)] = true; });
+    const faltan = [];
+    (window.PROGRAMACION_PRECARGADA || []).forEach(s => { const f = fichaDe(s); if (!cargadas[f] && faltan.indexOf(f) === -1) faltan.push(f); });
+    return faltan;
+  }
   function msg(id, text, ok) { const el = $(id); el.innerHTML = text ? `<div class="msg ${ok ? 'ok' : 'err'}">${esc(text)}</div>` : ''; }
 
   // ---------------------------------------------------------------------------
@@ -106,21 +128,28 @@
     const cells = cal.weeks.flat().map(c => {
       if (!c) return '<div class="day vacio"></div>';
       const ses = (sesPorDia[c.date] || []).slice().sort((a, b) => a.start.localeCompare(b.start));
-      const lineas = ses.map(x => `<span class="h ses ${x.status}">${esc(x.start.replace(':00', ''))}–${esc(x.end.replace(':00', ''))} ${esc(corto(x.competencia))}</span>`);
+      const lineas = ses.map(x => `<span class="h ses ${x.status}${esComplementaria(x) ? ' comp' : ''}">${esComplementaria(x) ? '◆ ' : ''}${esc(x.start.replace(':00', ''))}–${esc(x.end === '23:59' ? '24' : x.end.replace(':00', ''))} ${esc(corto(x.competencia))}</span>`);
       if (c.registradas) lineas.push(`<span class="h reg">✓ ${c.registradas} h reg.</span>`);
       if (c.festivo) lineas.push('<span class="h">festivo</span>');
       const cls = ['day', c.estado, c.hoy ? 'hoy' : '', ses.length ? 'con-sesion' : ''].join(' ');
-      const title = [fmt(c.date, true)].concat(ses.map(x => `${x.start}–${x.end} ${x.competencia}${x.rap ? ' / ' + x.rap : ''} (${x.hours} h, ${x.status})`), [`${c.registradas} h registradas`]).join('\n');
+      const title = [fmt(c.date, true)].concat(ses.map(x => `${x.start}–${x.end} ${x.competencia}${x.rap ? ' / ' + x.rap : ''} (${x.hours} h, ${x.status}) · ficha ${fichaDe(x)}${x.programa ? ' ' + x.programa : ''}`), [`${c.registradas} h registradas`]).join('\n');
       return `<div class="${cls}" data-date="${c.estado === 'fuera' ? '' : c.date}" title="${esc(title)}"><span class="n">${c.day}${c.programadas ? ` <small>P ${c.programadas} h</small>` : ''}</span>${lineas.join('')}</div>`;
     }).join('');
     $('calendario').innerHTML = head + cells;
     const ym = `${cal.year}-${String(cal.month).padStart(2, '0')}`;
     const cargadas = state.sessions.some(x => x.date.slice(0, 7) === ym);
     const enCronograma = (window.PROGRAMACION_PRECARGADA || []).filter(x => x.date.slice(0, 7) === ym).length;
-    $('cal-aviso').innerHTML = !cargadas && enCronograma
+    $('cal-aviso').innerHTML = (!cargadas && enCronograma
       ? `<div class="msg err">Este mes no tiene sesiones cargadas, pero el cronograma incluido tiene ${enCronograma}. <button type="button" class="btn sec sm" id="cal-cargar">Cargar programación completa</button></div>`
-      : '';
+      : '') + avisoComplementarias('cal-comp');
     const b = $('cal-cargar'); if (b) b.addEventListener('click', cargarPrecargada);
+    const bc = $('cal-comp'); if (bc) bc.addEventListener('click', cargarComplementarias);
+  }
+
+  function avisoComplementarias(btnId) {
+    const faltan = fichasFaltantes();
+    if (!faltan.length) return '';
+    return `<div class="msg err">Hay formaciones complementarias en la programación incluida que aún no están cargadas: ${esc(faltan.map(nombreFicha).join('; '))}. <button type="button" class="btn sec sm" id="${btnId}">Agregar formaciones complementarias</button></div>`;
   }
   $('cal-prev').addEventListener('click', () => calShift(-1));
   $('cal-next').addEventListener('click', () => calShift(1));
@@ -252,23 +281,39 @@
     msg('imp-msg', `Importadas ${r.importadas.length} sesiones (${C.sumHours(r.importadas)} h) desde ${origen}. Programación actual: ${state.sessions.length} sesiones.`, true);
   }
 
+  /** Lee un cronograma .xlsx y devuelve las sesiones del instructor con la ficha y el programa del archivo. */
+  function leerCronograma(f) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('no se pudo leer ' + f.name));
+      reader.onload = e => {
+        try {
+          const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: true });
+          const ws = wb.Sheets[wb.SheetNames[0]];
+          const grid = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+          C.fillMerges(grid, ws['!merges']);
+          const meta = C.cronogramaMeta(grid, f.name);
+          if (!meta.ficha) meta.ficha = cfg().ficha;
+          resolve(Object.assign({ archivo: f.name }, meta, C.parseCronogramaGrid(grid, cfg().instructorName, meta)));
+        } catch (err) { reject(new Error(f.name + ': ' + err.message)); }
+      };
+      reader.readAsArrayBuffer(f);
+    });
+  }
+
+  // Se pueden elegir varios cronogramas a la vez (la ficha principal y las complementarias).
+  // Cada archivo solo reemplaza las sesiones de su propia ficha.
   $('file-xlsx').addEventListener('change', ev => {
-    const f = ev.target.files[0]; if (!f) return;
+    const files = Array.from(ev.target.files || []); if (!files.length) return;
     if (typeof XLSX === 'undefined') { msg('imp-msg', 'No se pudo cargar la librería para leer Excel (requiere internet la primera vez). Usa CSV o la programación incluida.', false); return; }
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array', cellDates: true });
-        const ws = wb.Sheets[wb.SheetNames[0]];
-        const grid = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
-        C.fillMerges(grid, ws['!merges']);
-        const { sessions, errors } = C.parseCronogramaGrid(grid, cfg().instructorName, { ficha: cfg().ficha });
-        if (errors.length) { msg('imp-msg', errors.join('. '), false); return; }
-        importSessions(sessions, f.name);
-      } catch (err) { msg('imp-msg', 'Error leyendo el archivo: ' + err.message, false); }
-      ev.target.value = '';
-    };
-    reader.readAsArrayBuffer(f);
+    Promise.all(files.map(leerCronograma)).then(res => {
+      const conSesiones = res.filter(r => r.sessions.length);
+      const sin = res.filter(r => !r.sessions.length);
+      if (conSesiones.length) importSessions([].concat(...conSesiones.map(r => r.sessions)), conSesiones.map(r => `${r.archivo} (ficha ${r.ficha}: ${r.sessions.length} sesiones)`).join(', '));
+      else msg('imp-msg', '', true);
+      if (sin.length) $('imp-msg').innerHTML += `<div class="msg err">${esc(sin.map(r => `${r.archivo}: no aparece "${cfg().instructorName}"`).join('; '))}</div>`;
+    }).catch(err => msg('imp-msg', 'Error leyendo el archivo: ' + err.message, false))
+      .then(() => { ev.target.value = ''; });
   });
 
   $('file-csv').addEventListener('change', ev => {
@@ -292,10 +337,18 @@
   }
   $('btn-precargada').addEventListener('click', cargarPrecargada);
 
+  /** Agrega solo las fichas complementarias de la programación incluida que aún no están cargadas. */
+  function cargarComplementarias() {
+    const faltan = fichasFaltantes();
+    const pre = (window.PROGRAMACION_PRECARGADA || []).filter(s => faltan.indexOf(fichaDe(s)) !== -1).map(s => C.makeSession(Object.assign({}, s)));
+    importSessions(pre, 'la programación incluida (formaciones complementarias)', { todo: true });
+  }
+
   $('form-sesion').addEventListener('submit', ev => {
     ev.preventDefault();
     const parsed = C.parseCellText('X - ' + $('s-comp').value.trim());
-    const s = C.makeSession({ date: $('s-date').value, start: $('s-start').value, end: $('s-end').value, ficha: cfg().ficha, competencia: parsed.competencia, rap: parsed.rap });
+    const ficha = $('s-ficha').value.trim() || cfg().ficha;
+    const s = C.makeSession({ date: $('s-date').value, start: $('s-start').value, end: $('s-end').value, ficha, programa: fichasConocidas()[ficha] || '', competencia: parsed.competencia, rap: parsed.rap });
     const errors = C.validateEntry(s);
     if (errors.length) { msg('imp-msg', errors.join('. '), false); return; }
     state.sessions.push(s); save();
@@ -318,6 +371,15 @@
     const t = today(); const c = cfg();
     let list = state.sessions.slice().sort((a, b) => a.date.localeCompare(b.date) || a.start.localeCompare(b.start));
     if ($('ver-solo-contrato').checked) list = list.filter(s => C.inContract(s.date, c));
+    const fichas = fichasConocidas(), verFicha = $('ver-ficha').value;
+    $('ver-ficha').innerHTML = '<option value="">Todas las fichas</option>' + Object.keys(fichas).map(f => `<option value="${esc(f)}" ${f === verFicha ? 'selected' : ''}>${esc(nombreFicha(f))}</option>`).join('');
+    $('fichas-list').innerHTML = Object.keys(fichas).map(f => `<option value="${esc(f)}">${esc(nombreFicha(f))}</option>`).join('');
+    $('prog-aviso').innerHTML = avisoComplementarias('prog-comp');
+    const bc = $('prog-comp'); if (bc) bc.addEventListener('click', cargarComplementarias);
+    const porFicha = C.groupByDate(list.map(s => ({ date: fichaDe(s), hours: s.hours })));
+    $('prog-fichas').innerHTML = Object.keys(porFicha).sort((a, b) => esComplementaria({ ficha: a }) - esComplementaria({ ficha: b }) || a.localeCompare(b))
+      .map(f => `<span class="badge ${f === String(c.ficha) ? 'gris' : 'comp'}">${esc(nombreFicha(f))}: ${porFicha[f].length} sesiones · ${C.sumHours(porFicha[f])} h</span>`).join(' ');
+    if (verFicha) list = list.filter(s => fichaDe(s) === verFicha);
     $('prog-total').textContent = list.length ? `${list.length} sesiones · ${C.sumHours(list)} h` : 'Sin programación';
     if (!list.length) { $('tabla-programacion').innerHTML = '<p class="muted">Importa el cronograma, un CSV o carga la programación incluida.</p>'; return; }
     const byWeek = {};
@@ -333,6 +395,7 @@
           <td>${esc(fmt(s.date))}${noHabil ? ' <span class="badge amarillo">no hábil</span>' : ''}</td>
           <td>${esc(s.start)}–${esc(s.end)}</td>
           <td><strong>${s.hours}</strong></td>
+          <td><span class="badge ${esComplementaria(s) ? 'comp' : 'gris'}" title="${esc(s.programa || '')}">${esc(fichaDe(s))}</span>${s.programa ? `<br><span class="muted">${esc(s.programa)}</span>` : ''}</td>
           <td>${esc(s.competencia)}${s.rap ? `<br><span class="muted">${esc(s.rap)}</span>` : ''}</td>
           <td><select data-status="${s.id}">${Object.keys(estados).map(k => `<option value="${k}" ${s.status === k ? 'selected' : ''}>${estados[k]}</option>`).join('')}</select>
               <div style="margin-top:4px"><span class="badge ${badge[s.status]}">${estados[s.status]}</span>${registrada ? ' <span class="badge verde">registrada</span>' : ''}</div></td>
@@ -340,10 +403,11 @@
         </tr>`;
       }).join('');
       return `<div class="semana">Semana del ${fmt(w)} al ${fmt(C.addDays(w, 6))} · ${C.sumHours(byWeek[w])} h</div>
-        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Horario</th><th>Horas</th><th>Competencia / RAP</th><th>Estado</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+        <div class="table-wrap"><table><thead><tr><th>Fecha</th><th>Horario</th><th>Horas</th><th>Ficha / programa</th><th>Competencia / RAP</th><th>Estado</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
     }).join('');
   }
   $('ver-solo-contrato').addEventListener('change', renderProgramacion);
+  $('ver-ficha').addEventListener('change', renderProgramacion);
   $('tabla-programacion').addEventListener('change', ev => { if (ev.target.dataset.status) setStatus(ev.target.dataset.status, ev.target.value); });
   $('tabla-programacion').addEventListener('click', ev => {
     const b = ev.target.closest('button'); if (!b) return;

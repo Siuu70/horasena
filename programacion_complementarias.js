@@ -1,0 +1,117 @@
+// Formaciones complementarias de RONALDO BALLESTEROS extraídas de los cronogramas
+// "1. 3626326 - MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION.xlsx" y "2. 3622710 - OPERACIONES COMERCIALES.xlsx" (28/09/2026).
+// Se suman a la programación incluida de la ficha principal (programacion_3536507.js).
+window.PROGRAMACION_PRECARGADA = (window.PROGRAMACION_PRECARGADA || []).concat([
+ {
+  "id": "comp3626326-01",
+  "status": "pendiente",
+  "activity": "formacion",
+  "ficha": "3626326",
+  "programa": "MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION",
+  "competencia": "Utilizar herramientas informáticas de acuerdo con las necesidades de manejo de información",
+  "rap": "",
+  "ambiente": "",
+  "date": "2026-10-06",
+  "start": "16:00",
+  "end": "23:59",
+  "hours": 8
+ },
+ {
+  "id": "comp3626326-02",
+  "status": "pendiente",
+  "activity": "formacion",
+  "ficha": "3626326",
+  "programa": "MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION",
+  "competencia": "Utilizar herramientas informáticas de acuerdo con las necesidades de manejo de información",
+  "rap": "",
+  "ambiente": "",
+  "date": "2026-10-14",
+  "start": "16:00",
+  "end": "23:59",
+  "hours": 8
+ },
+ {
+  "id": "comp3626326-03",
+  "status": "pendiente",
+  "activity": "formacion",
+  "ficha": "3626326",
+  "programa": "MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION",
+  "competencia": "Utilizar herramientas informáticas de acuerdo con las necesidades de manejo de información",
+  "rap": "",
+  "ambiente": "",
+  "date": "2026-10-20",
+  "start": "16:00",
+  "end": "23:59",
+  "hours": 8
+ },
+ {
+  "id": "comp3626326-04",
+  "status": "pendiente",
+  "activity": "formacion",
+  "ficha": "3626326",
+  "programa": "MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION",
+  "competencia": "Utilizar herramientas informáticas de acuerdo con las necesidades de manejo de información",
+  "rap": "",
+  "ambiente": "",
+  "date": "2026-10-28",
+  "start": "16:00",
+  "end": "23:59",
+  "hours": 8
+ },
+ {
+  "id": "comp3626326-05",
+  "status": "pendiente",
+  "activity": "formacion",
+  "ficha": "3626326",
+  "programa": "MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION",
+  "competencia": "Utilizar herramientas informáticas de acuerdo con las necesidades de manejo de información",
+  "rap": "",
+  "ambiente": "",
+  "date": "2026-11-18",
+  "start": "16:00",
+  "end": "23:59",
+  "hours": 8
+ },
+ {
+  "id": "comp3626326-06",
+  "status": "pendiente",
+  "activity": "formacion",
+  "ficha": "3626326",
+  "programa": "MANTENIMIENTO DE EQUIPOS DE AIRE ACONDICIONADO Y REFRIGERACION",
+  "competencia": "Utilizar herramientas informáticas de acuerdo con las necesidades de manejo de información",
+  "rap": "",
+  "ambiente": "",
+  "date": "2026-11-30",
+  "start": "16:00",
+  "end": "23:59",
+  "hours": 8
+ },
+ {
+  "id": "comp3622710-01",
+  "status": "pendiente",
+  "activity": "formacion",
+  "ficha": "3622710",
+  "programa": "OPERACIONES COMERCIALES",
+  "competencia": "OFIMATICA",
+  "rap": "",
+  "ambiente": "",
+  "date": "2026-10-26",
+  "start": "16:00",
+  "end": "23:59",
+  "hours": 8
+ },
+ {
+  "id": "comp3622710-02",
+  "status": "pendiente",
+  "activity": "formacion",
+  "ficha": "3622710",
+  "programa": "OPERACIONES COMERCIALES",
+  "competencia": "OFIMATICA",
+  "rap": "",
+  "ambiente": "",
+  "date": "2026-10-30",
+  "start": "16:00",
+  "end": "23:59",
+  "hours": 8
+ }
+]);
