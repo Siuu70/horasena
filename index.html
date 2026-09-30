@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es" data-v="20260928152207">
+<html lang="es" data-v="20260930120330">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -21,7 +21,7 @@
       }).catch(function () {});
     })();
   </script>
-  <link rel="stylesheet" href="styles.css?v=20260928152207">
+  <link rel="stylesheet" href="styles.css?v=20260930120330">
 </head>
 <body>
 <header>
@@ -123,7 +123,11 @@
       <h2>Importar programación</h2>
       <div class="row" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px">
         <div>
-          <label>Cronogramas SENA (.xlsx) — ficha principal y complementarias; se filtra por tu nombre</label>
+          <label>Instructor a buscar (nombre tal como aparece en el cronograma)</label>
+          <input type="text" id="imp-instructor" placeholder="Ej: RONALDO BALLESTEROS" autocomplete="off">
+        </div>
+        <div>
+          <label>Cronogramas SENA (.xlsx) — ficha principal y complementarias; se filtra por el instructor</label>
           <input type="file" id="file-xlsx" accept=".xlsx,.xlsm,.xls" multiple>
         </div>
         <div>
@@ -134,7 +138,7 @@
       <div class="actions" style="margin-top:8px">
         <label style="display:inline-flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="imp-solo-contrato"> Solo fechas dentro del contrato</label>
         <label style="display:inline-flex;gap:6px;align-items:center;margin:0"><input type="checkbox" id="imp-reemplazar" checked> Reemplazar la programación actual</label>
-        <button class="btn sec" id="btn-precargada">Cargar programación incluida (cronograma del 14/09/2026, todos los meses)</button>
+        <button class="btn sec" id="btn-precargada">Cargar programación incluida de RONALDO BALLESTEROS (todos los meses)</button>
       </div>
       <p class="muted">Puedes elegir varios cronogramas a la vez. La ficha se toma del nombre del archivo (p. ej. <i>2. 3622710 - OPERACIONES COMERCIALES.xlsx</i>) y cada archivo solo reemplaza las sesiones de su ficha, así que importar una formación complementaria no borra las demás.</p>
       <div id="imp-msg"></div>
@@ -214,9 +218,9 @@
 <footer>Control de horas · SENA · zona horaria America/Bogota</footer>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="calc.js?v=20260928152207"></script>
-<script src="programacion_3536507.js?v=20260928152207"></script>
-<script src="programacion_complementarias.js?v=20260928152207"></script>
-<script src="app.js?v=20260928152207"></script>
+<script src="calc.js?v=20260930120330"></script>
+<script src="programacion_3536507.js?v=20260930120330"></script>
+<script src="programacion_complementarias.js?v=20260930120330"></script>
+<script src="app.js?v=20260930120330"></script>
 </body>
 </html>

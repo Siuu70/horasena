@@ -301,10 +301,19 @@
     });
   }
 
+  // Instructor a buscar en los cronogramas: se guarda en la configuración (el mismo dato de "Nombre en el cronograma").
+  $('imp-instructor').value = cfg().instructorName || '';
+  $('imp-instructor').addEventListener('change', () => {
+    state.config = C.normalizeConfig(Object.assign({}, state.config, { instructorName: $('imp-instructor').value.trim() }));
+    save();
+    $('c-name').value = cfg().instructorName || '';
+  });
+
   // Se pueden elegir varios cronogramas a la vez (la ficha principal y las complementarias).
   // Cada archivo solo reemplaza las sesiones de su propia ficha.
   $('file-xlsx').addEventListener('change', ev => {
     const files = Array.from(ev.target.files || []); if (!files.length) return;
+    if (!cfg().instructorName) { msg('imp-msg', 'Escribe primero el nombre del instructor a buscar.', false); ev.target.value = ''; return; }
     if (typeof XLSX === 'undefined') { msg('imp-msg', 'No se pudo cargar la librería para leer Excel (requiere internet la primera vez). Usa CSV o la programación incluida.', false); return; }
     Promise.all(files.map(leerCronograma)).then(res => {
       const conSesiones = res.filter(r => r.sessions.length);
@@ -449,6 +458,7 @@
       simulatedToday: $('c-today').value || '', workDays, holidays, timeZone: 'America/Bogota',
     });
     save();
+    $('imp-instructor').value = cfg().instructorName || '';
     $('c-msg').innerHTML = '<span class="badge verde">Configuración guardada</span>';
   });
 

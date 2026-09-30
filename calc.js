@@ -526,7 +526,11 @@
    */
   function parseCronogramaGrid(grid, instructorName, opts) {
     opts = opts || {};
-    const name = String(instructorName || '').trim().toLowerCase();
+    // Sin tildes ni mayúsculas; basta con que todas las palabras del nombre estén en la celda (en cualquier orden).
+    const sinTildes = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const name = sinTildes(instructorName || '').trim().replace(/\s+/g, ' ');
+    const palabras = name.split(' ').filter(Boolean);
+    const esDelInstructor = v => { const t = sinTildes(v), quien = t.split(' - ')[0]; return t.indexOf(name) !== -1 || palabras.every(w => quien.indexOf(w) !== -1); };
     if (!name) return { sessions: [], errors: ['Indica el nombre del instructor tal como aparece en el cronograma'] };
     const slots = []; // {date, start, end, text}
     const dateAbove = []; // por columna: última fecha vista
@@ -537,7 +541,7 @@
         const v = row[c];
         const iso = cellToISO(v);
         if (iso && !(typeof v === 'string' && /[a-záéíóú]/i.test(v))) { dateAbove[c] = iso; continue; }
-        if (label && typeof v === 'string' && v.toLowerCase().indexOf(name) !== -1 && dateAbove[c]) {
+        if (label && typeof v === 'string' && esDelInstructor(v) && dateAbove[c]) {
           slots.push({ date: dateAbove[c], start: normalizeTime(label[1]), end: normalizeTime(label[2]), text: v.trim() });
         }
       }
