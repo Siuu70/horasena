@@ -524,13 +524,22 @@
    * (Date, serial o texto) encima de cada bloque de franjas; celdas 'NOMBRE - Competencia / nota'.
    * Devuelve las sesiones del instructor, fusionando franjas consecutivas del mismo día y texto.
    */
+  /**
+   * ¿El texto (celda 'NOMBRE - Competencia' o un nombre) es del instructor? Sin tildes ni mayúsculas;
+   * basta con que todas las palabras del nombre estén antes del primer ' - ' (en cualquier orden).
+   */
+  function nameMatches(text, instructorName) {
+    const sinTildes = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+    const name = sinTildes(instructorName).trim().replace(/\s+/g, ' ');
+    if (!name) return false;
+    const t = sinTildes(text), quien = t.split(' - ')[0];
+    return t.indexOf(name) !== -1 || name.split(' ').every(w => quien.indexOf(w) !== -1);
+  }
+
   function parseCronogramaGrid(grid, instructorName, opts) {
     opts = opts || {};
-    // Sin tildes ni mayúsculas; basta con que todas las palabras del nombre estén en la celda (en cualquier orden).
-    const sinTildes = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-    const name = sinTildes(instructorName || '').trim().replace(/\s+/g, ' ');
-    const palabras = name.split(' ').filter(Boolean);
-    const esDelInstructor = v => { const t = sinTildes(v), quien = t.split(' - ')[0]; return t.indexOf(name) !== -1 || palabras.every(w => quien.indexOf(w) !== -1); };
+    const name = String(instructorName || '').trim();
+    const esDelInstructor = v => nameMatches(v, name);
     if (!name) return { sessions: [], errors: ['Indica el nombre del instructor tal como aparece en el cronograma'] };
     const slots = []; // {date, start, end, text}
     const dateAbove = []; // por columna: última fecha vista
@@ -677,7 +686,7 @@
     normalizeConfig, isHoliday, isBusinessDay, businessDays, countBusinessDays,
     businessDaysElapsed, businessDaysRemaining, expectedHoursToDate,
     inContract, overlaps, groupByDate, summarize, buildAlerts, calendarMonth,
-    cellToISO, normalizeTime, parseCSV, parseCronogramaGrid, cronogramaMeta, parseCellText, fillMerges, makeSession, mergeSessions,
+    cellToISO, normalizeTime, parseCSV, parseCronogramaGrid, nameMatches, cronogramaMeta, parseCellText, fillMerges, makeSession, mergeSessions,
     uid, entryFromSession, fullDayEntry, validateEntry,
   };
 });

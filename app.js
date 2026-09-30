@@ -10,8 +10,14 @@
   // ---------------------------------------------------------------------------
   let state = load();
   // Primera vez (sin datos guardados): cargar la programación del cronograma para que el calendario ya la muestre.
-  if (!localStorage.getItem(STORAGE_KEY) && !state.sessions.length && window.PROGRAMACION_PRECARGADA) {
-    state.sessions = window.PROGRAMACION_PRECARGADA.map(x => C.makeSession(Object.assign({}, x)));
+  if (!localStorage.getItem(STORAGE_KEY) && !state.sessions.length) {
+    state.sessions = precargada().map(x => C.makeSession(Object.assign({}, x)));
+  }
+
+  /** Programación incluida en la app: solo aplica si el instructor configurado es el del cronograma incluido. */
+  function precargada() {
+    const pre = window.PROGRAMACION_PRECARGADA || [];
+    return pre.length && C.nameMatches(window.PROGRAMACION_INSTRUCTOR || '', state.config.instructorName) ? pre : [];
   }
 
   function load() {
@@ -45,7 +51,7 @@
   function fichasConocidas() {
     const map = {};
     if (cfg().ficha) map[cfg().ficha] = '';
-    (window.PROGRAMACION_PRECARGADA || []).concat(state.sessions).forEach(s => { const f = fichaDe(s); if (f && !map[f]) map[f] = s.programa || ''; });
+    precargada().concat(state.sessions).forEach(s => { const f = fichaDe(s); if (f && !map[f]) map[f] = s.programa || ''; });
     return map;
   }
   function nombreFicha(f) {
@@ -54,10 +60,11 @@
   }
   /** Fichas de la programación incluida que todavía no están cargadas. */
   function fichasFaltantes() {
+    if (!state.sessions.length) return []; // programación borrada a propósito: no insistir
     const cargadas = {};
     state.sessions.forEach(s => { cargadas[fichaDe(s)] = true; });
     const faltan = [];
-    (window.PROGRAMACION_PRECARGADA || []).forEach(s => { const f = fichaDe(s); if (!cargadas[f] && faltan.indexOf(f) === -1) faltan.push(f); });
+    precargada().forEach(s => { const f = fichaDe(s); if (!cargadas[f] && faltan.indexOf(f) === -1) faltan.push(f); });
     return faltan;
   }
   function msg(id, text, ok) { const el = $(id); el.innerHTML = text ? `<div class="msg ${ok ? 'ok' : 'err'}">${esc(text)}</div>` : ''; }
@@ -138,7 +145,7 @@
     $('calendario').innerHTML = head + cells;
     const ym = `${cal.year}-${String(cal.month).padStart(2, '0')}`;
     const cargadas = state.sessions.some(x => x.date.slice(0, 7) === ym);
-    const enCronograma = (window.PROGRAMACION_PRECARGADA || []).filter(x => x.date.slice(0, 7) === ym).length;
+    const enCronograma = state.sessions.length ? precargada().filter(x => x.date.slice(0, 7) === ym).length : 0;
     $('cal-aviso').innerHTML = (!cargadas && enCronograma
       ? `<div class="msg err">Este mes no tiene sesiones cargadas, pero el cronograma incluido tiene ${enCronograma}. <button type="button" class="btn sec sm" id="cal-cargar">Cargar programación completa</button></div>`
       : '') + avisoComplementarias('cal-comp');
@@ -339,7 +346,7 @@
   });
 
   function cargarPrecargada() {
-    const pre = (window.PROGRAMACION_PRECARGADA || []).map(s => C.makeSession(Object.assign({}, s)));
+    const pre = precargada().map(s => C.makeSession(Object.assign({}, s)));
     // Se carga completa (todos los meses) sin aplicar el filtro "solo contrato", para que el calendario muestre todo el cronograma.
     $('imp-reemplazar').checked = true;
     importSessions(pre, 'la programación incluida (cronograma completo, todos los meses)', { todo: true });
@@ -349,7 +356,7 @@
   /** Agrega solo las fichas complementarias de la programación incluida que aún no están cargadas. */
   function cargarComplementarias() {
     const faltan = fichasFaltantes();
-    const pre = (window.PROGRAMACION_PRECARGADA || []).filter(s => faltan.indexOf(fichaDe(s)) !== -1).map(s => C.makeSession(Object.assign({}, s)));
+    const pre = precargada().filter(s => faltan.indexOf(fichaDe(s)) !== -1).map(s => C.makeSession(Object.assign({}, s)));
     importSessions(pre, 'la programación incluida (formaciones complementarias)', { todo: true });
   }
 
@@ -489,10 +496,14 @@
 
   $('btn-reset').addEventListener('click', () => {
     if (!confirm('¿Borrar TODOS los datos (registros, programación y configuración)? Esta acción no se puede deshacer.')) return;
-    localStorage.removeItem(STORAGE_KEY); state = sanitize(null); save(); renderConfig(); resetForm();
+    // Queda en blanco: sin nombre ni ficha, para que no se ofrezca la programación incluida de otro instructor.
+    localStorage.removeItem(STORAGE_KEY); state = sanitize(null);
+    state.config = C.normalizeConfig(Object.assign({}, state.config, { instructorName: '', ficha: '' }));
+    save(); renderConfig(); resetForm();
+    $('imp-instructor').value = '';
   });
 
   // ---------------------------------------------------------------------------
-  function renderAll() { renderPanel(); renderCalendario(); renderRegistros(); renderProgramacion(); }
+  function renderAll() { $('btn-precargada').hidden = !precargada().length; renderPanel(); renderCalendario(); renderRegistros(); renderProgramacion(); }
   renderConfig(); resetForm(); renderAll();
 })();

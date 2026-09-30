@@ -1,5 +1,7 @@
 // Programación de RONALDO BALLESTEROS extraída del cronograma "1. 3536507 - ANALISIS Y DESARROLLO SOFTWARE (12).xlsx" (22/09/2026).
 // Se carga con el botón "Cargar programación incluida" de la pestaña Programación.
+// Solo se ofrece cuando el instructor configurado es este.
+window.PROGRAMACION_INSTRUCTOR = 'RONALDO BALLESTEROS';
 window.PROGRAMACION_PRECARGADA = [
  {
   "id": "prog001",
